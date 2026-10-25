@@ -1,9 +1,12 @@
 package com.finflow.ticketmcp.youtrack;
 
+import java.net.http.HttpClient;
+import java.time.Duration;
 import java.util.List;
 
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
@@ -15,19 +18,26 @@ public class YouTrackClient {
     private final RestClient restClient;
 
     public YouTrackClient(
-            @Value("${youtrack.base-url}") String baseUrl,
-            @Value("${youtrack.token}") String token) {
+        @Value("${youtrack.base-url}") String baseUrl,
+        @Value("${youtrack.token}") String token) {
+
+        HttpClient httpClient = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(3))
+            .build();
+
+        JdkClientHttpRequestFactory requestFactory =
+            new JdkClientHttpRequestFactory(httpClient);
+
+        requestFactory.setReadTimeout(Duration.ofSeconds(5));
 
         this.restClient = RestClient.builder()
-                .baseUrl(baseUrl)
-                .defaultHeader(
-                        "Authorization",
-                        "Bearer " + token)
-                .defaultHeader(
-                        "Accept",
-                        "application/json")
-                .build();
+            .baseUrl(baseUrl)
+            .requestFactory(requestFactory)
+            .defaultHeader("Authorization", "Bearer " + token)
+            .defaultHeader("Accept", "application/json")
+            .build();
     }
+
 
     public List<YouTrackIssue> getIssues(int limit, int offset) {
         return restClient.get()

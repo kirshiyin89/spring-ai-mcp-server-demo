@@ -7,6 +7,8 @@ import org.springframework.ai.mcp.annotation.McpToolParam;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
 
 @Component
 public class YouTrackTools {
@@ -70,10 +72,16 @@ public class YouTrackTools {
           "AUTHENTICATION_FAILED", null,
           "YouTrack rejected the configured credentials."
       );
-    } catch (org.springframework.web.client.HttpClientErrorException.Forbidden ex) {
+    } catch (HttpClientErrorException.Forbidden ex) {
       return new YouTrackIssueResult(
-          "AUTHENTICATION_FAILED", null,
+          "PERMISSION_DENIED",
+          null,
           "The configured YouTrack credentials do not have permission to access issues."
+      );
+    } catch (ResourceAccessException ex) {
+      return new YouTrackIssueResult(
+          "SERVICE_UNAVAILABLE", null,
+          "YouTrack could not be reached. Please try again later."
       );
     }
   }
