@@ -15,3 +15,8 @@ youtrack:
 
 server:
   port: 8090
+
+app:
+  security:
+    mcp:
+      shared-secret: ${MCP_SHARED_SECRET}
