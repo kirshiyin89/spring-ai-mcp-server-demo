@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: finflow-ticket-mcp-server
+  ai:
+    mcp:
+      server:
+        name: finflow-ticket-mcp-server
+        version: 0.0.1
+        protocol: STREAMABLE
+        type: SYNC
+
+youtrack:
+  base-url: https://curiousdevscorner.youtrack.cloud
+  token: ${YOUTRACK_TOKEN}
+
+server:
+  port: 8090
