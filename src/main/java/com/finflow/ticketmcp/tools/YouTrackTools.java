@@ -41,17 +41,30 @@ public class YouTrackTools {
 
     String normalizedId = issueId.trim();
 
-    return youTrackClient.getIssue(normalizedId)
-        .map(issue -> new YouTrackIssueResult(true, issue, null))
-        .orElseGet(() -> new YouTrackIssueResult(
-            false,
-            null,
-            "No YouTrack issue exists with ID " + normalizedId + "."
-        ));
+    try {
+      return youTrackClient.getIssue(normalizedId)
+          .map(issue -> new YouTrackIssueResult(
+              "FOUND", issue, null))
+          .orElseGet(() -> new YouTrackIssueResult(
+              "NOT_FOUND", null,
+              "No YouTrack issue exists with ID " + normalizedId + "."
+          ));
+
+    } catch (org.springframework.web.client.HttpClientErrorException.Unauthorized ex) {
+      return new YouTrackIssueResult(
+          "AUTHENTICATION_FAILED", null,
+          "YouTrack rejected the configured credentials."
+      );
+    } catch (org.springframework.web.client.HttpClientErrorException.Forbidden ex) {
+      return new YouTrackIssueResult(
+          "AUTHENTICATION_FAILED", null,
+          "The configured YouTrack credentials do not have permission to access issues."
+      );
+    }
   }
 
   public record YouTrackIssueResult(
-      boolean found,
+      String status,
       YouTrackClient.YouTrackIssue issue,
       String message
   ) {
