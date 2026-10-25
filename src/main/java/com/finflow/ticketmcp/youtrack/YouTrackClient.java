@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.JsonNode;
 
 @Component
 public class YouTrackClient {
@@ -30,7 +31,10 @@ public class YouTrackClient {
         return restClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/api/issues")
-                .queryParam("fields", "idReadable,summary")
+                .queryParam(
+                    "fields",
+                    "idReadable,summary,customFields(name,value(name))"
+                )
                 .queryParam("$top", limit)
                 .build())
             .retrieve()
@@ -42,16 +46,23 @@ public class YouTrackClient {
         return restClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/api/issues/{issueId}")
-                .queryParam("fields", "idReadable,summary")
+                .queryParam(
+                    "fields",
+                    "idReadable,summary,customFields(name,value(name))"
+                )
                 .build(issueId))
             .retrieve()
             .body(YouTrackIssue.class);
     }
 
-
-
     public record YouTrackIssue(
-            String idReadable,
-            String summary) {
+        String idReadable,
+        String summary,
+        List<YouTrackCustomField> customFields) {
+    }
+
+    public record YouTrackCustomField(
+        String name,
+        JsonNode value) {
     }
 }
