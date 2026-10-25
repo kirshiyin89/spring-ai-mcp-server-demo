@@ -29,7 +29,7 @@ public class YouTrackClient {
                 .build();
     }
 
-    public List<YouTrackIssue> getIssues(int limit) {
+    public List<YouTrackIssue> getIssues(int limit, int offset) {
         return restClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/api/issues")
@@ -38,6 +38,7 @@ public class YouTrackClient {
                     "idReadable,summary,customFields(name,value(name))"
                 )
                 .queryParam("$top", limit)
+                .queryParam("$skip", offset)
                 .build())
             .retrieve()
             .body(new org.springframework.core.ParameterizedTypeReference<>() {});

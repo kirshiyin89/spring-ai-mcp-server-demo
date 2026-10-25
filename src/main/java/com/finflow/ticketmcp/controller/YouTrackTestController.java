@@ -18,7 +18,7 @@ public class YouTrackTestController {
 
     @GetMapping("/api/youtrack/issues")
     public List<YouTrackIssue> getIssues() {
-        return youTrackClient.getIssues(5);
+        return youTrackClient.getIssues(5, 0); //First page, up to 5 issues
     }
 
 }

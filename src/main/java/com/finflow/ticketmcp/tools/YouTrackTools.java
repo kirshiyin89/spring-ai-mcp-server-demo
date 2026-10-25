@@ -17,16 +17,26 @@ public class YouTrackTools {
     this.youTrackClient = youTrackClient;
   }
 
-  @McpTool(description = "Get a list of issues from YouTrack")
+  @McpTool(description = "Get a page of issues from YouTrack")
   public List<YouTrackIssue> getYouTrackIssues(
       @McpToolParam(
-          description = "Maximum number of issues to return"
-      ) int limit) {
+          description = "Maximum number of issues to return (1-100)"
+      ) int limit,
+      @McpToolParam(
+          description = "Number of issues to skip; must be zero or greater"
+      ) int offset) {
+
     if (limit < 1 || limit > 100) {
       throw new IllegalArgumentException(
           "Limit must be between 1 and 100");
     }
-    return youTrackClient.getIssues(limit);
+
+    if (offset < 0) {
+      throw new IllegalArgumentException(
+          "Offset must be zero or greater");
+    }
+
+    return youTrackClient.getIssues(limit, offset);
   }
 
   @McpTool(description = "Get a specific YouTrack issue by its issue ID")
@@ -40,6 +50,11 @@ public class YouTrackTools {
     }
 
     String normalizedId = issueId.trim();
+
+    if (!normalizedId.matches("[A-Z][A-Z0-9]*-\\d+")) {
+      throw new IllegalArgumentException(
+          "Issue ID must match the format PROJECT-123, e.g. DEMO-123");
+    }
 
     try {
       return youTrackClient.getIssue(normalizedId)
