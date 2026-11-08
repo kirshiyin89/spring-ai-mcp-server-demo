@@ -4,6 +4,7 @@ import com.finflow.ticketmcp.youtrack.YouTrackClient;
 import com.finflow.ticketmcp.youtrack.YouTrackClient.YouTrackIssue;
 import org.springframework.ai.mcp.annotation.McpTool;
 import org.springframework.ai.mcp.annotation.McpToolParam;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -14,6 +15,9 @@ import org.springframework.web.client.ResourceAccessException;
 public class YouTrackTools {
 
   private final YouTrackClient youTrackClient;
+
+  @Value("${youtrack.project-id}")
+  private String projectId;
 
   public YouTrackTools(YouTrackClient youTrackClient) {
     this.youTrackClient = youTrackClient;
@@ -92,5 +96,33 @@ public class YouTrackTools {
       String message
   ) {
 
+  }
+
+  @McpTool(description = """
+    Create a YouTrack issue after the user explicitly approves
+    the proposed issue draft. Do not call this tool before
+    approval.
+    """)
+  public YouTrackClient.YouTrackIssueCreated createYouTrackIssue(
+      @McpToolParam(description = "Issue title")
+      String summary,
+
+      @McpToolParam(description = "Issue description")
+      String description) {
+
+    if (summary == null || summary.isBlank()) {
+      throw new IllegalArgumentException(
+          "Issue summary must not be blank");
+    }
+
+    if (description == null || description.isBlank()) {
+      throw new IllegalArgumentException(
+          "Issue description must not be blank");
+    }
+
+    return youTrackClient.createIssue(
+        projectId,
+        summary.trim(),
+        description.trim());
   }
 }

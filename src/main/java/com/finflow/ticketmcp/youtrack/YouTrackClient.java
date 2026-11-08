@@ -6,6 +6,7 @@ import java.util.List;
 
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -72,6 +73,47 @@ public class YouTrackClient {
         } catch (HttpClientErrorException.NotFound ex) {
             return Optional.empty();
         }
+    }
+
+    public YouTrackIssueCreated createIssue(
+        String projectId,
+        String summary,
+        String description) {
+
+        var request = new CreateIssueRequest(
+            new ProjectReference(projectId),
+            summary,
+            description
+        );
+
+        return restClient.post()
+            .uri(uriBuilder -> uriBuilder
+                .path("/api/issues")
+                .queryParam(
+                    "fields",
+                    "id,idReadable,summary"
+                )
+                .build())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .retrieve()
+            .body(YouTrackIssueCreated.class);
+    }
+
+
+    public record CreateIssueRequest(
+        ProjectReference project,
+        String summary,
+        String description) {
+    }
+
+    public record ProjectReference(String id) {
+    }
+
+    public record YouTrackIssueCreated(
+        String id,
+        String idReadable,
+        String summary) {
     }
 
     public record YouTrackIssue(

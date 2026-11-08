@@ -12,6 +12,7 @@ spring:
 youtrack:
   base-url: https://curiousdevscorner.youtrack.cloud
   token: ${YOUTRACK_TOKEN}
+  project-id: ${YOUTRACK_PROJECT_ID}
 
 server:
   port: 8090
