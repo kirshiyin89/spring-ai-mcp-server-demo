@@ -3,7 +3,7 @@ package com.finflow.ticketmcp.controller;
 import java.util.List;
 
 import com.finflow.ticketmcp.youtrack.YouTrackClient;
-import com.finflow.ticketmcp.youtrack.YouTrackClient.YouTrackIssue;
+import com.finflow.ticketmcp.youtrack.YouTrackIssue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 

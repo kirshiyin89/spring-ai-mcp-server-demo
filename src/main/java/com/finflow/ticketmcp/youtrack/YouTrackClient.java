@@ -116,15 +116,30 @@ public class YouTrackClient {
         String summary) {
     }
 
-    public record YouTrackIssue(
-        String idReadable,
-        String summary,
-        List<YouTrackCustomField> customFields) {
-    }
-
     public record YouTrackCustomField(
         String name,
         JsonNode value) {
     }
+
+    public List<YouTrackIssue> searchIssues(
+        String query, int limit, int offset) {
+
+        return restClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/api/issues")
+                .queryParam(
+                    "fields",
+                    "idReadable,summary,description,customFields(name,value(name))"
+                )
+                .queryParam("description", query)
+                .queryParam("$top", limit)
+                .queryParam("$skip", offset)
+                .build())
+            .retrieve()
+            .body(
+                new org.springframework.core.ParameterizedTypeReference<>() {}
+            );
+    }
+
 
 }

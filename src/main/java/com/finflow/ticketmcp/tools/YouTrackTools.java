@@ -1,12 +1,11 @@
 package com.finflow.ticketmcp.tools;
 
 import com.finflow.ticketmcp.youtrack.YouTrackClient;
-import com.finflow.ticketmcp.youtrack.YouTrackClient.YouTrackIssue;
+import com.finflow.ticketmcp.youtrack.YouTrackIssue;
 import org.springframework.ai.mcp.annotation.McpTool;
 import org.springframework.ai.mcp.annotation.McpToolParam;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
@@ -92,17 +91,17 @@ public class YouTrackTools {
 
   public record YouTrackIssueResult(
       String status,
-      YouTrackClient.YouTrackIssue issue,
+      YouTrackIssue issue,
       String message
   ) {
 
   }
 
   @McpTool(description = """
-    Create a YouTrack issue after the user explicitly approves
-    the proposed issue draft. Do not call this tool before
-    approval.
-    """)
+      Create a YouTrack issue after the user explicitly approves
+      the proposed issue draft. Do not call this tool before
+      approval.
+      """)
   public YouTrackClient.YouTrackIssueCreated createYouTrackIssue(
       @McpToolParam(description = "Issue title")
       String summary,
@@ -124,5 +123,41 @@ public class YouTrackTools {
         projectId,
         summary.trim(),
         description.trim());
+  }
+
+  @McpTool(description = """
+      Search YouTrack issues using the native YouTrack search query.
+      Returns matching issues with pagination.
+      """)
+  public List<YouTrackIssue> searchYouTrackIssues(
+      @McpToolParam(
+          description = "YouTrack search query, for example VPN or GitLab"
+      ) String query,
+
+      @McpToolParam(
+          description = "Maximum number of issues to return (1-100)"
+      ) int limit,
+
+      @McpToolParam(
+          description = "Number of issues to skip; must be zero or greater"
+      ) int offset) {
+
+    if (query == null || query.isBlank()) {
+      throw new IllegalArgumentException(
+          "Search query must not be blank");
+    }
+
+    if (limit < 1 || limit > 100) {
+      throw new IllegalArgumentException(
+          "Limit must be between 1 and 100");
+    }
+
+    if (offset < 0) {
+      throw new IllegalArgumentException(
+          "Offset must be zero or greater");
+    }
+
+    return youTrackClient.searchIssues(
+        query.trim(), limit, offset);
   }
 }
